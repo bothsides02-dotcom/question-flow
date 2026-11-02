@@ -22,7 +22,7 @@ export default function App() {
 
   // 画像ファイルのURLを作成する
   function getImageUrl(imageSrc: string) {
-    return `${import.meta.env.BASE_URL}${imageSrc.replace(/^\/+/, "")}`;
+    return `/question-flow/${imageSrc.replace(/^\/+/, "")}`;
   }
 
   // 現在の診断結果に対応する画像一覧
@@ -57,7 +57,7 @@ export default function App() {
       return null;
     }
 
-    return `${import.meta.env.BASE_URL}${imageB.replace(/^\/+/, "")}`;
+    return `/question-flow/${imageB.replace(/^\/+/, "")}`;
   }
 
   // Escキーと左右矢印キーで操作

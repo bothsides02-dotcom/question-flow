@@ -1,10 +1,22 @@
+
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import { VitePWA } from "vite-plugin-pwa";
 
-// GitHubリポジトリ名が question-flow の場合はこのままでOKです。
-// リポジトリ名を変える場合は "/リポジトリ名/" に変更してください。
-// username.github.io という名前のリポジトリなら base は "/" にします。
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    VitePWA({
+      registerType: "autoUpdate",
+
+      workbox: {
+        globPatterns: [
+          "**/*.{js,css,html,ico,png,svg,webp,avif,jpg,jpeg,JPG,JPEG,gif,bmp}",
+        ],
+        maximumFileSizeToCacheInBytes: 50 * 1024 * 1024,
+      },
+    }),
+  ],
+
   base: "/question-flow/",
 });
