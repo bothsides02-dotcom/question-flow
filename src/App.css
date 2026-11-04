@@ -392,3 +392,192 @@ button:focus-visible {
     font-size: 14px;
   }
 }
+
+
+/* 質問タイトルと模式図 */
+.question-title-row {
+  position: relative;
+  display: flex;
+  min-height: 88px;
+  align-items: center;
+  justify-content: center;
+  margin: 8px 0 24px;
+}
+
+.question-panel .question-title-row h2 {
+  margin: 0;
+  padding: 0 100px;
+}
+
+.question-diagram-button {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  display: flex;
+  width: 84px;
+  height: 84px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transform: translateY(-50%);
+  border: 0;
+  background: transparent;
+}
+
+.question-diagram-button img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.question-diagram-button:hover {
+  opacity: 0.8;
+}
+
+/* 初回使い方ポップアップ */
+.guide-modal {
+  position: fixed;
+  z-index: 2000;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.guide-modal-content {
+  width: 100%;
+  max-width: 760px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  padding: clamp(22px, 4vw, 36px);
+  border: 1px solid #e7e1d7;
+  border-radius: 18px;
+  background: #fffefa;
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+.guide-modal-content h2 {
+  margin: 8px 0 14px;
+  font-size: clamp(23px, 4vw, 30px);
+}
+
+.guide-intro {
+  margin: 0 auto 24px;
+  color: #625b50;
+  font-size: 14px;
+  line-height: 1.9;
+}
+
+.guide-images {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.guide-figure {
+  min-width: 0;
+  margin: 0;
+}
+
+.guide-figure img {
+  display: block;
+  width: 100%;
+  height: 220px;
+  object-fit: contain;
+  border: 1px solid #e7e1d7;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.guide-figure figcaption {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.guide-figure figcaption strong {
+  color: #38352f;
+  font-size: 14px;
+}
+
+.guide-figure figcaption span {
+  color: #766b5c;
+}
+
+.guide-note {
+  margin: 22px 0;
+  color: #766b5c;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.guide-start-button {
+  width: min(100%, 320px);
+  min-height: 50px;
+  padding: 12px 20px;
+  border: 1px solid #38352f;
+  border-radius: 10px;
+  background: #38352f;
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+}
+
+.guide-start-button:hover {
+  background: #554f45;
+}
+
+/* 模式図の拡大表示 */
+.diagram-modal-image {
+  cursor: default;
+}
+
+/* スマートフォン向け */
+@media (max-width: 600px) {
+  .question-title-row {
+    min-height: 72px;
+    margin: 8px 0 24px;
+  }
+
+  .question-panel .question-title-row h2 {
+    padding: 0 68px;
+    font-size: clamp(19px, 5vw, 24px);
+  }
+
+  .question-diagram-button {
+    width: 64px;
+    height: 64px;
+  }
+
+  .guide-modal {
+    padding: 10px;
+  }
+
+  .guide-modal-content {
+    max-height: calc(100vh - 20px);
+    padding: 22px 16px;
+    border-radius: 14px;
+  }
+
+  .guide-images {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+
+  .guide-figure img {
+    height: 180px;
+  }
+
+  .guide-intro {
+    font-size: 13px;
+  }
+}

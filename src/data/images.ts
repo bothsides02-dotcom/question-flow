@@ -116,7 +116,7 @@ export const resultImages: ResultImage[] = [
   { id: "image105", src: "images/107_1_a.JPG", tag: "C", alt: "髭切", keywords: ["ひげきり"] },
   { id: "image106", src: "images/107_2_a.JPG", tag: "I", alt: "髭切", keywords: ["ひげきり"] },
   { id: "image107", src: "images/112_1_a.JPG", tag: "A", alt: "膝丸", keywords: ["ひざまる"] },
-  { id: "image108", src: "images/112_2_a.JPG", tag: "K", alt: "膝丸", keywords: ["ひげきり"] },
+  { id: "image108", src: "images/112_2_a.JPG", tag: "K", alt: "膝丸", keywords: ["ひざまる"] },
   { id: "image109", src: "images/116_1_a.JPG", tag: "B", alt: "大俱利伽羅", keywords: ["おおくりから"] },
   { id: "image110", src: "images/116_2_a.JPG", tag: "F", alt: "大俱利伽羅", keywords: ["おおくりから"] },
   { id: "image111", src: "images/118_1_a.JPG", tag: "A", alt: "へし切長谷部", keywords: ["へしきりはせべ"] },

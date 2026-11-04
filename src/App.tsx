@@ -1,6 +1,19 @@
+
 import { useEffect, useState } from "react";
 import { flow, startNodeId } from "./data/flow";
 import { resultImages } from "./data/images";
+
+// 質問IDと模式図の対応
+const questionDiagrams: Record<string, string> = {
+  q1: "K-1.PNG",
+  q2: "M.PNG",
+  q3: "O.PNG",
+  q4: "N.PNG",
+  q5: "K-2.PNG",
+  q6: "L.PNG",
+};
+
+const GUIDE_STORAGE_KEY = "question-flow-guide-seen";
 
 export default function App() {
   const [currentId, setCurrentId] = useState(startNodeId);
@@ -11,6 +24,12 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<"diagnosis" | "search">(
     "diagnosis"
   );
+
+  // 初回使い方ポップアップ
+  const [showGuide, setShowGuide] = useState(false);
+
+  // 拡大表示中の模式図
+  const [selectedDiagram, setSelectedDiagram] = useState<string | null>(null);
 
   // 検索欄の入力内容
   const [searchQuery, setSearchQuery] = useState("");
@@ -60,28 +79,54 @@ export default function App() {
     return `/question-flow/${imageB.replace(/^\/+/, "")}`;
   }
 
+  // 初回アクセス時だけ使い方を表示
+  useEffect(() => {
+    try {
+      const hasSeenGuide = window.localStorage.getItem(GUIDE_STORAGE_KEY);
+
+      if (hasSeenGuide !== "true") {
+        setShowGuide(true);
+      }
+    } catch (error) {
+      // localStorageが利用できない場合も使い方を表示する
+      console.warn("初回表示の確認ができませんでした:", error);
+      setShowGuide(true);
+    }
+  }, []);
+
+  // 使い方を閉じて診断を開始
+  function startDiagnosis() {
+    try {
+      window.localStorage.setItem(GUIDE_STORAGE_KEY, "true");
+    } catch (error) {
+      console.warn("表示済み情報を保存できませんでした:", error);
+    }
+
+    setShowGuide(false);
+  }
+
   // Escキーと左右矢印キーで操作
   useEffect(() => {
-    if (selectedImageIndex === null) return;
+    if (selectedImageIndex === null && selectedDiagram === null) return;
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
         setSelectedImageIndex(null);
+        setSelectedDiagram(null);
       }
 
-      if (event.key === "ArrowLeft") {
+      // 左右矢印キーは画像bの拡大表示中だけ使用
+      if (selectedImageIndex !== null && event.key === "ArrowLeft") {
         setSelectedImageIndex((previous) => {
           if (previous === null || modalImages.length === 0) {
             return previous;
           }
 
-          return (
-            previous - 1 + modalImages.length
-          ) % modalImages.length;
+          return (previous - 1 + modalImages.length) % modalImages.length;
         });
       }
 
-      if (event.key === "ArrowRight") {
+      if (selectedImageIndex !== null && event.key === "ArrowRight") {
         setSelectedImageIndex((previous) => {
           if (previous === null || modalImages.length === 0) {
             return previous;
@@ -97,10 +142,11 @@ export default function App() {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [selectedImageIndex, modalImages.length]);
+  }, [selectedImageIndex, selectedDiagram, modalImages.length]);
 
   function goTo(nextId: string) {
     setSelectedImageIndex(null);
+    setSelectedDiagram(null);
     setHistory((previous) => [...previous, currentId]);
     setCurrentId(nextId);
   }
@@ -111,6 +157,7 @@ export default function App() {
     const previousId = history[history.length - 1];
 
     setSelectedImageIndex(null);
+    setSelectedDiagram(null);
     setHistory((previous) => previous.slice(0, -1));
     setCurrentId(previousId);
   }
@@ -119,6 +166,7 @@ export default function App() {
     setCurrentId(startNodeId);
     setHistory([]);
     setSelectedImageIndex(null);
+    setSelectedDiagram(null);
   }
 
   if (!node) {
@@ -130,11 +178,15 @@ export default function App() {
     );
   }
 
+  // 現在の質問に対応する模式図
+  const currentDiagram =
+    node.type === "question" ? questionDiagrams[node.id] : undefined;
+
   return (
     <main className="app">
       <header className="site-header">
-        <p className="eyebrow">Ver.26.10.02</p>
-        <h1>ちよこ/かぼちゃ大作戦早押しチャート（お試し）</h1>
+        <p className="eyebrow">Ver.26.10.04</p>
+        <h1>ちよこ/かぼちゃ大作戦早押しチャート（試作）</h1>
       </header>
 
       {/* タブ切り替え */}
@@ -148,6 +200,7 @@ export default function App() {
           onClick={() => {
             setActiveTab("diagnosis");
             setSelectedImageIndex(null);
+            setSelectedDiagram(null);
           }}
         >
           チャート
@@ -162,6 +215,7 @@ export default function App() {
           onClick={() => {
             setActiveTab("search");
             setSelectedImageIndex(null);
+            setSelectedDiagram(null);
           }}
         >
           画像検索
@@ -195,6 +249,7 @@ export default function App() {
                       key={image.id}
                       type="button"
                       onClick={() => {
+                        setSelectedDiagram(null);
                         setModalImages(searchResults);
                         setSelectedImageIndex(index);
                       }}
@@ -228,7 +283,24 @@ export default function App() {
             >
               <p className="step-label">QUESTION</p>
 
-              <h2 id="question-title">{node.title}</h2>
+              {/* 質問タイトルと模式図 */}
+              <div className="question-title-row">
+                <h2 id="question-title">{node.title}</h2>
+
+                {currentDiagram && (
+                  <button
+                    type="button"
+                    className="question-diagram-button"
+                    onClick={() => setSelectedDiagram(currentDiagram)}
+                    aria-label="模式図を拡大表示"
+                  >
+                    <img
+                      src={getImageUrl(`images/${currentDiagram}`)}
+                      alt={`${currentDiagram}の模式図`}
+                    />
+                  </button>
+                )}
+              </div>
 
               <div className="choices">
                 {node.choices.map((choice) => (
@@ -276,6 +348,7 @@ export default function App() {
                     key={image.id}
                     type="button"
                     onClick={() => {
+                      setSelectedDiagram(null);
                       setModalImages(imagesForResult);
                       setSelectedImageIndex(index);
                     }}
@@ -320,6 +393,82 @@ export default function App() {
       <footer className="site-footer">
         これは非公式のファンサイトです。著作権は権利者様側へ帰属しております。画像の転載・流用はご遠慮下さい。なんかあれば→https://forms.gle/ZmYJUcZWiZaVAtcT9
       </footer>
+
+      {/* 初回アクセス時の使い方ポップアップ */}
+      {showGuide && (
+        <div className="guide-modal">
+          <section
+            className="guide-modal-content"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="guide-title"
+          >
+            <p className="step-label">HOW TO USE</p>
+            <h2 id="guide-title">このツールの使い方</h2>
+
+            <p className="guide-intro">
+              指定されたマスを開き、条件に合う選択肢を選んでください。
+              該当するパネルの一覧が表示されます。
+            </p>
+
+            <div className="guide-images">
+              <figure className="guide-figure">
+                <img
+                  src={getImageUrl("images/IMG_0275.PNG")}
+                  alt="ゲーム内パネル"
+                />
+                <figcaption>
+                  <strong>① 上段・中央を開く</strong>
+                  <span>
+                    まず、上段・中央のマスを開けてください。
+                  </span>
+                </figcaption>
+              </figure>
+
+              <figure className="guide-figure">
+                <img
+                  src={getImageUrl("images/K-1.PNG")}
+                  alt="上段・中央の模式図"
+                />
+                <figcaption>
+                  <strong>② 表示に従う</strong>
+                  <span>
+                    次に開ける（見る）マスは、右上に表示されます。
+                  </span>
+                </figcaption>
+              </figure>
+            </div>
+
+            <p className="guide-note">
+              各画像は、クリック / タップで拡大できます。
+            </p>
+
+            <button
+              type="button"
+              className="guide-start-button"
+              onClick={startDiagnosis}
+            >
+              はじめる
+            </button>
+          </section>
+        </div>
+      )}
+
+      {/* 模式図の拡大表示 */}
+      {selectedDiagram && (
+        <div
+          className="image-modal"
+          onClick={() => setSelectedDiagram(null)}
+          role="presentation"
+        >
+          <img
+            className="image-modal-image diagram-modal-image"
+            src={getImageUrl(`images/${selectedDiagram}`)}
+            alt="模式図の拡大表示"
+            onClick={(event) => event.stopPropagation()}
+          />
+        </div>
+      )}
 
       {/* 画像bの拡大表示 */}
       {selectedImage && selectedImageIndex !== null && (
