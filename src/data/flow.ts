@@ -41,7 +41,7 @@ export const flow: Record<string, FlowNode> = {
   q1: {
     type: "question",
     id: "q1",
-    title: "まず、上段・中央を開けてください。",
+    title: "まず、上段・中央を開けてください",
     choices: [
       { label: "頭）凸部分あり", nextId: "q2" },
       { label: "頭）凸部分なし / 丸い", nextId: "q3" },

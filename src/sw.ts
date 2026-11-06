@@ -30,6 +30,11 @@ const appEntries = allEntries.filter(
 
 precacheAndRoute(appEntries);
 
+// 新しいService Workerをすぐに有効化する
+self.addEventListener("install", (event: ExtendableEvent) => {
+  event.waitUntil(self.skipWaiting());
+});
+
 // 画像一覧の更新内容に応じてキャッシュ名を変更する
 const imageVersionText = imageEntries
   .map((entry) => `${entry.url}:${entry.revision ?? ""}`)
@@ -45,10 +50,13 @@ for (let i = 0; i < imageVersionText.length; i++) {
 const IMAGE_CACHE_NAME =
   `question-flow-images-${Math.abs(imageVersionHash)}`;
 
-// 古いバージョンの画像キャッシュを整理する
+// 新しいService Workerを有効化し、古い画像キャッシュを整理する
 self.addEventListener("activate", (event: ExtendableEvent) => {
   event.waitUntil(
     (async () => {
+      // 開いているページの制御を引き継ぐ
+      await self.clients.claim();
+
       const cacheNames = await caches.keys();
 
       await Promise.all(
