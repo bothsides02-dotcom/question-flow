@@ -41,10 +41,10 @@ export const flow: Record<string, FlowNode> = {
   q1: {
     type: "question",
     id: "q1",
-    title: "上段・中央？",
+    title: "まず、上段・中央を開けてください。",
     choices: [
-      { label: "頭）毛束 / アホ毛あり", nextId: "q2" },
-      { label: "頭）毛束 / アホ毛なし", nextId: "q3" },
+      { label: "頭）凸部分あり", nextId: "q2" },
+      { label: "頭）凸部分なし / 丸い", nextId: "q3" },
       { label: "ぜんぶ黒", nextId: "q4" },
       { label: "足）白もある", nextId: "q5" },
     ],
@@ -54,7 +54,7 @@ export const flow: Record<string, FlowNode> = {
   q2: {
     type: "question",
     id: "q2",
-    title: "上段・中央）右下ぜんぶ黒？",
+    title: "上段・中央）このマスの右下は？",
     choices: [
       { label: "上段・中央）右下ぜんぶ黒", nextId: "resultA" },
       { label: "上段・中央）白もある", nextId: "resultB" },
@@ -65,7 +65,7 @@ export const flow: Record<string, FlowNode> = {
   q3: {
     type: "question",
     id: "q3",
-    title: "下段・右？",
+    title: "下段・右）シルエットは右辺に接する？",
     choices: [
       { label: "下段・右）右辺に接する", nextId: "resultC" },
       { label: "下段・右）右辺に接さない", nextId: "resultD" },
@@ -77,11 +77,11 @@ export const flow: Record<string, FlowNode> = {
   q4: {
     type: "question",
     id: "q4",
-    title: "下段・中央？",
+    title: "下段・中央に見えているつま先の数？",
     choices: [
-      { label: "下段・中央）爪先0", nextId: "resultF" },
-      { label: "下段・中央）爪先1", nextId: "resultG" },
-      { label: "下段・中央）爪先2", nextId: "resultH" },
+      { label: "下段・中央）つま先0", nextId: "resultF" },
+      { label: "下段・中央）つま先1", nextId: "resultG" },
+      { label: "下段・中央）つま先2", nextId: "resultH" },
     ],
   },
 
@@ -89,7 +89,7 @@ export const flow: Record<string, FlowNode> = {
   q5: {
     type: "question",
     id: "q5",
-    title: "上段・中央？",
+    title: "上段・中央）シルエットは右辺に接する？",
     choices: [
       { label: "上段・中央）右辺に接さない", nextId: "resultI" },
       { label: "上段・中央）右辺に接する", nextId: "q6" },
@@ -100,7 +100,7 @@ export const flow: Record<string, FlowNode> = {
   q6: {
     type: "question",
     id: "q6",
-    title: "上段・中央？",
+    title: "上段・中央）このマスの右上は？",
     choices: [
       { label: "上段・中央）右上ぜんぶ黒", nextId: "resultJ" },
       { label: "上段・中央）右上に白もある", nextId: "resultK" },

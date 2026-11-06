@@ -39,6 +39,17 @@ const [imageTagFilter, setImageTagFilter] = useState<
   "all" | "A-E" | "F-K"
 >("all");
 
+// 画像保存の進捗状況
+const [cacheProgress, setCacheProgress] = useState<{
+  totalBytes: number;
+  savedBytes: number;
+  percent: number;
+  complete: boolean;
+} | null>(null);
+
+// 末尾の点滅表示
+const [savingDots, setSavingDots] = useState("…");
+
   // 拡大表示中の画像一覧
   const [modalImages, setModalImages] = useState<typeof resultImages>([]);
 
@@ -164,6 +175,66 @@ const searchResults = normalizedQuery
     };
   }, [selectedImageIndex, selectedDiagram, modalImages.length]);
 
+
+  // Ctrl + ↑ / Ctrl + ↓ で画像検索の絞り込みを切り替える
+  useEffect(() => {
+    function handleFilterShortcut(event: KeyboardEvent) {
+      // 画像検索タブ以外では無効
+      if (activeTab !== "search") return;
+
+      // 画像や模式図の拡大表示中は無効
+      if (selectedImageIndex !== null || selectedDiagram !== null) return;
+
+      // Ctrlキー以外の修飾キーが押されている場合は無効
+      if (!event.ctrlKey || event.altKey || event.metaKey || event.shiftKey) {
+        return;
+      }
+
+      // キーを押し続けた場合の連続切り替えを防止
+      if (event.repeat) return;
+
+      // 入力欄や文字入力可能な場所では無効
+      const target = event.target;
+
+      if (
+        target instanceof HTMLElement &&
+        (
+          target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.tagName === "SELECT" ||
+          target.isContentEditable
+        )
+      ) {
+        return;
+      }
+
+      // Ctrl + ↑：上半身のみ
+      if (event.key === "ArrowUp") {
+        event.preventDefault();
+
+        setImageTagFilter((previous) =>
+          previous === "A-E" ? "all" : "A-E"
+        );
+      }
+
+      // Ctrl + ↓：下半身のみ
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
+
+        setImageTagFilter((previous) =>
+          previous === "F-K" ? "all" : "F-K"
+        );
+      }
+    }
+
+    window.addEventListener("keydown", handleFilterShortcut);
+
+    return () => {
+      window.removeEventListener("keydown", handleFilterShortcut);
+    };
+  }, [activeTab, selectedImageIndex, selectedDiagram]);
+
+
   function goTo(nextId: string) {
     setSelectedImageIndex(null);
     setSelectedDiagram(null);
@@ -189,6 +260,55 @@ const searchResults = normalizedQuery
     setSelectedDiagram(null);
   }
 
+// 画像保存の進捗状況を受け取る
+useEffect(() => {
+  if (!("serviceWorker" in navigator)) return;
+
+  let cancelled = false;
+
+  function handleMessage(event: MessageEvent) {
+    if (event.data?.type === "IMAGE_CACHE_PROGRESS") {
+      setCacheProgress({
+        totalBytes: event.data.totalBytes,
+        savedBytes: event.data.savedBytes,
+        percent: event.data.percent,
+        complete: event.data.complete,
+      });
+    }
+  }
+
+  navigator.serviceWorker.addEventListener("message", handleMessage);
+
+  navigator.serviceWorker.ready.then((registration) => {
+    if (cancelled) return;
+
+    registration.active?.postMessage({
+      type: "START_IMAGE_CACHE",
+    });
+  });
+
+  return () => {
+    cancelled = true;
+    navigator.serviceWorker.removeEventListener(
+      "message",
+      handleMessage
+    );
+  };
+}, []);
+
+// 末尾の点をアニメーションさせる
+useEffect(() => {
+  const dots = ["…", "……", "………"];
+  let index = 0;
+
+  const timer = window.setInterval(() => {
+    index = (index + 1) % dots.length;
+    setSavingDots(dots[index]);
+  }, 500);
+
+  return () => window.clearInterval(timer);
+}, []);
+
   if (!node) {
     return (
       <main className="app">
@@ -205,7 +325,7 @@ const searchResults = normalizedQuery
   return (
     <main className="app">
       <header className="site-header">
-        <p className="eyebrow">Ver.26.10.04</p>
+        <p className="eyebrow">Ver.26.10.05</p>
         <h1>ちよこ/かぼちゃ大作戦早押しチャート（試作）</h1>
       </header>
 
@@ -241,6 +361,32 @@ const searchResults = normalizedQuery
           画像検索
         </button>
       </nav>
+
+      {/* 画像の保存状況 */}
+      {cacheProgress && !cacheProgress.complete && (
+        <div className="cache-progress">
+          <p className="cache-progress-title">
+            画像を端末に保存しています{savingDots}
+          </p>
+
+          <div className="cache-progress-info">
+            <strong>{cacheProgress.percent}%</strong>
+            <span>
+              {(cacheProgress.savedBytes / (1024 * 1024)).toFixed(1)}
+              {" MB / "}
+              {(cacheProgress.totalBytes / (1024 * 1024)).toFixed(1)}
+              {" MB"}
+            </span>
+          </div>
+
+          <div className="cache-progress-track">
+            <div
+              className="cache-progress-bar"
+              style={{ width: `${cacheProgress.percent}%` }}
+            />
+          </div>
+        </div>
+      )}
 
       {/* 画像検索タブ */}
       {activeTab === "search" && (

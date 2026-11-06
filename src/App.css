@@ -610,3 +610,48 @@ button:focus-visible {
     font-size: 13px;
   }
 }
+
+.cache-progress {
+  max-width: 700px;
+  margin: 16px auto;
+  padding: 14px 18px;
+  background: #f5f5f5;
+  border-radius: 10px;
+}
+
+.cache-progress-title {
+  margin: 0 0 10px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.cache-progress-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.cache-progress-info strong {
+  font-size: 1.4rem;
+}
+
+.cache-progress-info span {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.cache-progress-track {
+  width: 100%;
+  height: 10px;
+  overflow: hidden;
+  background: #ddd;
+  border-radius: 20px;
+}
+
+.cache-progress-bar {
+  height: 100%;
+  background: #16a34a;
+  border-radius: 20px;
+  transition: width 0.25s ease;
+}
