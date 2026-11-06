@@ -34,6 +34,11 @@ export default function App() {
   // 検索欄の入力内容
   const [searchQuery, setSearchQuery] = useState("");
 
+// 画像のタグによる絞り込み
+const [imageTagFilter, setImageTagFilter] = useState<
+  "all" | "A-E" | "F-K"
+>("all");
+
   // 拡大表示中の画像一覧
   const [modalImages, setModalImages] = useState<typeof resultImages>([]);
 
@@ -50,17 +55,32 @@ export default function App() {
       ? resultImages.filter((image) => image.tag === node.tag)
       : [];
 
-  // 全画像から検索する
-  const normalizedQuery = searchQuery.trim().toLowerCase();
-  const searchResults = normalizedQuery
-    ? resultImages.filter((image) => {
-        const searchableText = [image.alt, ...(image.keywords ?? [])]
-          .join(" ")
-          .toLowerCase();
+// タグとキーワードで画像を絞り込む
+const normalizedQuery = searchQuery.trim().toLowerCase();
 
-        return searchableText.includes(normalizedQuery);
-      })
-    : resultImages;
+// まずタグで絞り込む
+const tagFilteredImages = resultImages.filter((image) => {
+  if (imageTagFilter === "A-E") {
+    return ["A", "B", "C", "D", "E"].includes(image.tag);
+  }
+
+  if (imageTagFilter === "F-K") {
+    return ["F", "G", "H", "I", "J", "K"].includes(image.tag);
+  }
+
+  return true;
+});
+
+// 次にキーワードで絞り込む
+const searchResults = normalizedQuery
+  ? tagFilteredImages.filter((image) => {
+      const searchableText = [image.alt, ...(image.keywords ?? [])]
+        .join(" ")
+        .toLowerCase();
+
+      return searchableText.includes(normalizedQuery);
+    })
+  : tagFilteredImages;
 
   // 拡大表示する画像の情報
   const selectedImage =
@@ -235,10 +255,43 @@ export default function App() {
             onChange={(event) => setSearchQuery(event.target.value)}
           />
 
+<div className="image-filter-buttons">
+  <button
+    type="button"
+    className={
+      imageTagFilter === "A-E"
+        ? "filter-button active"
+        : "filter-button"
+    }
+    aria-pressed={imageTagFilter === "A-E"}
+    onClick={() =>
+      setImageTagFilter((previous) =>
+        previous === "A-E" ? "all" : "A-E"
+      )
+    }
+  >
+    上半身のみ
+  </button>
+
+  <button
+    type="button"
+    className={
+      imageTagFilter === "F-K"
+        ? "filter-button active"
+        : "filter-button"
+    }
+    aria-pressed={imageTagFilter === "F-K"}
+    onClick={() =>
+      setImageTagFilter((previous) =>
+        previous === "F-K" ? "all" : "F-K"
+      )
+    }
+  >
+    下半身のみ
+  </button>
+</div>
+
           <>
-              <p className="search-count">
-                検索結果：{searchResults.length}枚
-              </p>
 
               {searchResults.length > 0 ? (
                 <div className="image-grid">
@@ -255,7 +308,7 @@ export default function App() {
                       aria-label={`${image.alt}を拡大表示`}
                     >
                       <img
-                        src={getImageUrl(image.src)}
+                        src={getImageBUrl(image.src) ?? getImageUrl(image.src)}
                         alt={image.alt}
                         loading="lazy"
                       />

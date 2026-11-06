@@ -283,6 +283,37 @@ button:focus-visible {
   text-align: center;
 }
 
+/* 画像検索のタグ絞り込みボタン */
+.image-filter-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin: 16px auto;
+}
+
+.filter-button {
+  padding: 10px 16px;
+  border: 1px solid #d8cbb9;
+  border-radius: 10px;
+  background: #fff;
+  color: #50483e;
+  font: inherit;
+  font-size: 13px;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.filter-button:hover {
+  background: #f2ece3;
+  border-color: #a9957b;
+}
+
+.filter-button.active {
+  border-color: #79664f;
+  background: #79664f;
+  color: #fff;
+}
+
 /* 画像bの拡大表示 */
 .image-modal {
   position: fixed;
