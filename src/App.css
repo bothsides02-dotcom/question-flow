@@ -199,9 +199,18 @@ button:focus-visible {
 /* 画像一覧 */
 .image-grid {
   display: grid;
-  grid-template-columns: repeat(10, minmax(0, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(58px, 1fr));
+  gap: 6px;
   text-align: left;
+}
+
+/* サムネイルの大きさを統一 */
+.image-grid .image-card img {
+  display: block;
+  width: 100%;
+  height: 68px;
+  object-fit: contain;
+  background: #f7f5f0;
 }
 
 .image-card {
@@ -342,13 +351,6 @@ button:focus-visible {
   text-align: center;
 }
 
-/* 画面幅に応じた調整 */
-@media (max-width: 900px) {
-  .image-grid {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-  }
-}
-
 @media (max-width: 600px) {
   .app {
     width: min(100% - 20px, 920px);
@@ -359,10 +361,6 @@ button:focus-visible {
   .result-panel {
     padding: 24px 16px;
     border-radius: 15px;
-  }
-
-  .image-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .tab-button {

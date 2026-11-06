@@ -60,7 +60,7 @@ export default function App() {
 
         return searchableText.includes(normalizedQuery);
       })
-    : [];
+    : resultImages;
 
   // 拡大表示する画像の情報
   const selectedImage =
@@ -235,8 +235,7 @@ export default function App() {
             onChange={(event) => setSearchQuery(event.target.value)}
           />
 
-          {searchQuery.trim() !== "" && (
-            <>
+          <>
               <p className="search-count">
                 検索結果：{searchResults.length}枚
               </p>
@@ -268,8 +267,7 @@ export default function App() {
                   該当する画像が見つかりませんでした。
                 </p>
               )}
-            </>
-          )}
+          </>
         </section>
       )}
 
