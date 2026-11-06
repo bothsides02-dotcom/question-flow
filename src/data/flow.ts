@@ -77,7 +77,7 @@ export const flow: Record<string, FlowNode> = {
   q4: {
     type: "question",
     id: "q4",
-    title: "下段・中央に見えているつま先の数？",
+    title: "下段・中央）見えているつま先の数？",
     choices: [
       { label: "下段・中央）つま先0", nextId: "resultF" },
       { label: "下段・中央）つま先1", nextId: "resultG" },

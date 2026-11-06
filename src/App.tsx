@@ -366,8 +366,9 @@ useEffect(() => {
       {cacheProgress && !cacheProgress.complete && (
         <div className="cache-progress">
           <p className="cache-progress-title">
-            画像を端末に保存しています{savingDots}
-          </p>
+		<span>画像を端末に保存しています</span>
+		<span className="cache-progress-dots">{savingDots}</span>
+</p>
 
           <div className="cache-progress-info">
             <strong>{cacheProgress.percent}%</strong>

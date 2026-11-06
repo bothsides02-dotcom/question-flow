@@ -625,6 +625,12 @@ button:focus-visible {
   text-align: center;
 }
 
+.cache-progress-dots {
+  display: inline-block;
+  width: 3em;
+  text-align: left;
+}
+
 .cache-progress-info {
   display: flex;
   justify-content: space-between;
