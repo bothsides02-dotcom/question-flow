@@ -661,3 +661,31 @@ button:focus-visible {
   border-radius: 20px;
   transition: width 0.25s ease;
 }
+
+
+/* 選択肢のキーボードショートカット表示 */
+.choice-button {
+  display: flex;
+  align-items: center;
+}
+
+.choice-shortcut {
+  display: inline-flex;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  border-radius: 5px;
+  background: #222;
+  color: #fff;
+  font-size: 20px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.choice-label {
+  flex: 1;
+  text-align: left;
+}

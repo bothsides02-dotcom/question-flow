@@ -28,7 +28,8 @@ export type ResultNode = {
   type: "result";
   id: string;
   title: string;
-  tag: ResultTag;
+  tag?: ResultTag;
+  tags?: ResultTag[];
 };
 
 export type FlowNode = QuestionNode | ResultNode;
@@ -58,6 +59,7 @@ export const flow: Record<string, FlowNode> = {
     choices: [
       { label: "上段・中央）右下ぜんぶ黒", nextId: "resultA" },
       { label: "上段・中央）白もある", nextId: "resultB" },
+	{ label: "スキップ", nextId: "skipQ2" },
     ],
   },
 
@@ -70,6 +72,7 @@ export const flow: Record<string, FlowNode> = {
       { label: "下段・右）右辺に接する", nextId: "resultC" },
       { label: "下段・右）右辺に接さない", nextId: "resultD" },
       { label: "下段・右）ぜんぶ黒", nextId: "resultE" },
+	{ label: "スキップ", nextId: "skipQ3" },
     ],
   },
 
@@ -82,6 +85,7 @@ export const flow: Record<string, FlowNode> = {
       { label: "下段・中央）つま先0", nextId: "resultF" },
       { label: "下段・中央）つま先1", nextId: "resultG" },
       { label: "下段・中央）つま先2", nextId: "resultH" },
+	{ label: "スキップ", nextId: "skipQ4" },
     ],
   },
 
@@ -93,6 +97,7 @@ export const flow: Record<string, FlowNode> = {
     choices: [
       { label: "上段・中央）右辺に接さない", nextId: "resultI" },
       { label: "上段・中央）右辺に接する", nextId: "q6" },
+	{ label: "スキップ", nextId: "skipQ5" },
     ],
   },
 
@@ -104,7 +109,44 @@ export const flow: Record<string, FlowNode> = {
     choices: [
       { label: "上段・中央）右上ぜんぶ黒", nextId: "resultJ" },
       { label: "上段・中央）右上に白もある", nextId: "resultK" },
+	{ label: "スキップ", nextId: "skipQ6" },
     ],
+  },
+
+  // スキップ専用の結果
+  skipQ2: {
+    type: "result",
+    id: "skipQ2",
+    title: "結果A - B",
+    tags: ["A", "B"],
+  },
+
+  skipQ3: {
+    type: "result",
+    id: "skipQ3",
+    title: "結果C - E",
+    tags: ["C", "D", "E"],
+  },
+
+  skipQ4: {
+    type: "result",
+    id: "skipQ4",
+    title: "結果F - H",
+    tags: ["F", "G", "H"],
+  },
+
+  skipQ5: {
+    type: "result",
+    id: "skipQ5",
+    title: "結果I - K",
+    tags: ["I", "J", "K"],
+  },
+
+  skipQ6: {
+    type: "result",
+    id: "skipQ6",
+    title: "結果J - K",
+    tags: ["J", "K"],
   },
 
   // 診断結果A〜K

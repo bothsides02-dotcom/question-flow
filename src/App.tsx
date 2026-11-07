@@ -64,9 +64,18 @@ const [savingDots, setSavingDots] = useState("…");
   }
 
   // 現在の診断結果に対応する画像一覧
+  // 単一タグ・複数タグのどちらにも対応し、id順に並べる
   const imagesForResult =
     node?.type === "result"
-      ? resultImages.filter((image) => image.tag === node.tag)
+      ? resultImages
+          .filter((image) =>
+            node.tags
+              ? node.tags.includes(image.tag)
+              : image.tag === node.tag
+          )
+          .sort((a, b) =>
+            a.id.localeCompare(b.id, undefined, { numeric: true })
+          )
       : [];
 
 // タグとキーワードで画像を絞り込む
@@ -85,16 +94,31 @@ const tagFilteredImages = resultImages.filter((image) => {
   return true;
 });
 
-// 次にキーワードで絞り込む
-const searchResults = normalizedQuery
-  ? tagFilteredImages.filter((image) => {
-      const searchableText = [image.alt, ...(image.keywords ?? [])]
-        .join(" ")
-        .toLowerCase();
 
-      return searchableText.includes(normalizedQuery);
-    })
-  : tagFilteredImages;
+// SkipQ2〜SkipQ6に対応するタグ
+const skipTagGroups: Record<string, string[]> = {
+  "2": ["A", "B"],
+  "3": ["C", "D", "E"],
+  "4": ["F", "G", "H"],
+  "5": ["I", "J", "K"],
+  "6": ["J", "K"],
+};
+
+// タグとキーワードで検索
+const searchResults = skipTagGroups[normalizedQuery]
+  ? resultImages.filter((image) =>
+      skipTagGroups[normalizedQuery].includes(image.tag)
+    )
+  : normalizedQuery
+    ? tagFilteredImages.filter((image) => {
+        const searchableText = [image.alt, ...(image.keywords ?? [])]
+          .join(" ")
+          .toLowerCase();
+
+        return searchableText.includes(normalizedQuery);
+      })
+    : tagFilteredImages;
+
 
   // 拡大表示する画像の情報
   const selectedImage =
@@ -178,6 +202,124 @@ const searchResults = normalizedQuery
     };
   }, [selectedImageIndex, selectedDiagram, modalImages.length]);
 
+
+  // 診断チャートのCtrl + 矢印キーショートカット
+  useEffect(() => {
+    function handleDiagnosisShortcut(event: KeyboardEvent) {
+      // 診断チャート以外では無効
+      if (activeTab !== "diagnosis") return;
+
+      // 使い方ポップアップ表示中は無効
+      if (showGuide) return;
+
+      // 現在の画面を確認
+      const currentNode = flow[currentId];
+      if (!currentNode) return;
+
+      // 画像や模式図の拡大表示中は無効
+      if (selectedImageIndex !== null || selectedDiagram !== null) return;
+
+      // Ctrlキーと矢印キーを同時に押した場合だけ有効
+      if (
+        !event.ctrlKey ||
+        event.altKey ||
+        event.metaKey ||
+        event.shiftKey
+      ) {
+        return;
+      }
+
+      // キーを押し続けた場合の連続操作を防止
+      if (event.repeat) return;
+
+      // 入力欄などでは無効
+      const target = event.target;
+
+      if (
+        target instanceof HTMLElement &&
+        (
+          target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.tagName === "SELECT" ||
+          target.isContentEditable
+        )
+      ) {
+        return;
+      }
+
+
+      // 結果画面でのショートカット
+      if (currentNode.type === "result") {
+        // Ctrl + ↓：最初からやり直す
+        if (event.key === "ArrowDown") {
+          event.preventDefault();
+          restart();
+          return;
+        }
+
+        // Ctrl + ←：前の質問に戻る
+        if (event.key === "ArrowLeft") {
+          event.preventDefault();
+          goBack();
+          return;
+        }
+
+        return;
+      }
+
+
+      // 質問画面以外では無効
+      if (currentNode.type !== "question") return;
+
+      const skipChoice = currentNode.choices.find(
+        (choice) => choice.label === "スキップ"
+      );
+
+      const regularChoices = currentNode.choices.filter(
+        (choice) => choice.label !== "スキップ"
+      );
+
+      let selectedChoice:
+        | (typeof currentNode.choices)[number]
+        | undefined;
+
+      // スキップがある場合、Ctrl + ↓は必ずスキップ
+      if (event.key === "ArrowDown" && skipChoice) {
+        selectedChoice = skipChoice;
+      } else {
+        // 通常の選択肢を↑・←・→の順に割り当てる
+        const shortcutKeys = skipChoice
+          ? ["ArrowUp", "ArrowLeft", "ArrowRight"]
+          : ["ArrowUp", "ArrowLeft", "ArrowRight", "ArrowDown"];
+
+        const choiceIndex = shortcutKeys.indexOf(event.key);
+
+        if (choiceIndex === -1) return;
+
+        selectedChoice = regularChoices[choiceIndex];
+      }
+
+      if (!selectedChoice) return;
+
+      event.preventDefault();
+      goTo(selectedChoice.nextId);
+    }
+
+    window.addEventListener("keydown", handleDiagnosisShortcut);
+
+    return () => {
+      window.removeEventListener(
+        "keydown",
+        handleDiagnosisShortcut
+      );
+    };
+  }, [
+    activeTab,
+    currentId,
+    selectedImageIndex,
+    selectedDiagram,
+    showGuide,
+  ]);
 
   // Ctrl + ↑ / Ctrl + ↓ で画像検索の絞り込みを切り替える
   useEffect(() => {
@@ -336,7 +478,7 @@ useEffect(() => {
   return (
     <main className="app">
       <header className="site-header">
-        <p className="eyebrow">Ver.26.10.05</p>
+        <p className="eyebrow">Ver.26.10.05.03</p>
         <h1>ちよこ/かぼちゃ大作戦早押しチャート（試作）</h1>
       </header>
 
@@ -526,16 +668,45 @@ src={
                 )}
               </div>
 
+
               <div className="choices">
-                {node.choices.map((choice) => (
-                  <button
-                    className="choice-button"
-                    key={choice.label}
-                    onClick={() => goTo(choice.nextId)}
-                  >
-                    {choice.label}
-                  </button>
-                ))}
+                {node.choices.map((choice) => {
+                  const hasSkipChoice = node.choices.some(
+                    (item) => item.label === "スキップ"
+                  );
+
+                  const regularChoices = node.choices.filter(
+                    (item) => item.label !== "スキップ"
+                  );
+
+                  const shortcutKeys = hasSkipChoice
+                    ? ["↑", "←", "→"]
+                    : ["↑", "←", "→", "↓"];
+
+                  const shortcut =
+                    choice.label === "スキップ" && hasSkipChoice
+                      ? "↓"
+                      : shortcutKeys[
+                          regularChoices.findIndex(
+                            (item) => item.label === choice.label
+                          )
+                        ];
+
+                  return (
+                    <button
+                      className="choice-button"
+                      key={choice.label}
+                      onClick={() => goTo(choice.nextId)}
+                    >
+                      <span className="choice-shortcut">
+                        {shortcut}
+                      </span>
+                      <span className="choice-label">
+                        {choice.label}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
 
               <div className="footer-actions">
@@ -544,7 +715,7 @@ src={
                   onClick={goBack}
                   disabled={history.length === 0}
                 >
-                  ← ひとつ戻る
+                  ひとつ戻る
                 </button>
 
                 <button className="text-button" onClick={restart}>
@@ -606,7 +777,7 @@ src={
                 </button>
 
                 <button className="primary-button" onClick={restart}>
-                  最初からやり直す
+                  ↓ 最初からやり直す
                 </button>
               </div>
             </section>
