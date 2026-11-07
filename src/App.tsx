@@ -100,7 +100,7 @@ const skipTagGroups: Record<string, string[]> = {
   "2": ["A", "B"],
   "3": ["C", "D", "E"],
   "4": ["F", "G", "H"],
-  "5": ["I", "J", "K"],
+  "5": ["I"],
   "6": ["J", "K"],
 };
 
