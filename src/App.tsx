@@ -34,6 +34,9 @@ export default function App() {
   // 検索欄の入力内容
   const [searchQuery, setSearchQuery] = useState("");
 
+// 画像検索のサムネイル表示（false：画像b、true：画像a）
+const [showImageA, setShowImageA] = useState(false);
+
 // 画像のタグによる絞り込み
 const [imageTagFilter, setImageTagFilter] = useState<
   "all" | "A-E" | "F-K"
@@ -225,6 +228,14 @@ const searchResults = normalizedQuery
           previous === "F-K" ? "all" : "F-K"
         );
       }
+
+// Ctrl + →：画像a / 画像bを切り替える
+if (event.key === "ArrowRight") {
+  event.preventDefault();
+
+  setShowImageA((previous) => !previous);
+}
+
     }
 
     window.addEventListener("keydown", handleFilterShortcut);
@@ -436,6 +447,17 @@ useEffect(() => {
   >
     下半身のみ
   </button>
+
+<button
+  type="button"
+  className={
+    showImageA ? "filter-button active" : "filter-button"
+  }
+  aria-pressed={showImageA}
+  onClick={() => setShowImageA((previous) => !previous)}
+>
+  1マス表示
+</button>
 </div>
 
           <>
@@ -455,7 +477,11 @@ useEffect(() => {
                       aria-label={`${image.alt}を拡大表示`}
                     >
                       <img
-                        src={getImageBUrl(image.src) ?? getImageUrl(image.src)}
+src={
+  showImageA
+    ? getImageUrl(image.src)
+    : getImageBUrl(image.src) ?? getImageUrl(image.src)
+}
                         alt={image.alt}
                         loading="lazy"
                       />
